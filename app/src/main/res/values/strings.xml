@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">FloatingClock</string>
+    <string name="open">Open FloatingClock</string>
+    <string name="close">Close FloatingClock</string>
+</resources>
