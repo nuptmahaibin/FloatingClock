@@ -7,13 +7,17 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 public class MainActivity extends Activity {
+    private static final String TAG = "FloatingClock";
+
     private Button setTextSize;
     private EditText textsizeView;
 
@@ -23,13 +27,13 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         textsizeView = (EditText) findViewById(R.id.textsize);
+        update_textsizeView();
 
         setTextSize = (Button) findViewById(R.id.settextsize_button);
         setTextSize.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 String text = textsizeView.getText().toString();
-
                 if (TextUtils.isEmpty(text)) {
                     return;
                 } else {
@@ -37,21 +41,35 @@ public class MainActivity extends Activity {
                     try {
                         size = Integer.parseInt(text);
                     } catch (Exception e) {
-                        textsizeView.setText("");
+                        update_textsizeView();
                         return;
                     }
 
                     if (size <= 0) {
-                        textsizeView.setText("");
+                        update_textsizeView();
                         return;
                     }
 
                     MyApp.getApplication().setTextSize(size);
+                    update_textsizeView();
+                    sendLocalBroadcast();
                 }
             }
         });
 
         checkOverlayPermission();
+    }
+
+    private void sendLocalBroadcast() {
+        final Intent intent = new Intent(Utile.ACTION_UPDATECLOCK);
+        LocalBroadcastManager.getInstance(MainActivity.this).sendBroadcast(intent);
+        Log.d(TAG, "sendLocalBroadcast() action = " + Utile.ACTION_UPDATECLOCK);
+    }
+
+    private void update_textsizeView() {
+
+        textsizeView.setText("");
+        textsizeView.setHint("请输入字体大小（当前为" + MyApp.getApplication().getTextSize() + "）");
     }
 
     @Override
@@ -67,11 +85,9 @@ public class MainActivity extends Activity {
     }
 
     private void startService() {
-        if (!FloatingService.isFloatingWindowShow) {
-            Intent service = new Intent(this, FloatingService.class);
-            service.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startService(service);
-        }
+        Intent service = new Intent(this, FloatingService.class);
+        service.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startService(service);
     }
 
     private void stopService() {

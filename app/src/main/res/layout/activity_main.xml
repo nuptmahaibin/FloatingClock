@@ -7,14 +7,24 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
+    <!--TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="100dp"
+        android:text="瓜主席专用版"
+        android:textColor="@color/gold"
+        android:textSize="40dp" /-->
+
     <EditText
         android:id="@+id/textsize"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerVertical="true"
         android:layout_gravity="center"
-        android:hint="请输入字体尺寸（默认大小为30）"
-        android:inputType="phone" />
+
+        android:hint="请输入字体大小（当前为30）"
+        android:inputType="phone"
+        android:textSize="25dp" />
 
     <Button
         android:id="@+id/settextsize_button"

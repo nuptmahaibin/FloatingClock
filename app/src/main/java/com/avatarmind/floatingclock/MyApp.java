@@ -7,13 +7,9 @@ import android.util.Log;
 
 public class MyApp extends Application {
     private static final String TAG = "FloatingClock";
-    private static final String width = "width";
-    private static final String height = "height";
     private static final String x = "x";
     private static final String y = "y";
     private static final String textSize = "textSize";
-    private static final int defaultWidth = 420;
-    private static final int defaultHeight = 140;
     private static final int defaultX = 1;
     private static final int defaultY = 1;
     private static final int defaultTextSize = 30;
@@ -41,16 +37,6 @@ public class MyApp extends Application {
             return;
         } else {
             Log.d(TAG, "MyApp.initSharedPreferences() start");
-        }
-
-        if (!mSharedPreferences.contains(width)) {
-            mSharedPreferencesEditor.putInt(width, defaultWidth);
-            mSharedPreferencesEditor.commit();
-        }
-
-        if (!mSharedPreferences.contains(height)) {
-            mSharedPreferencesEditor.putInt(height, defaultHeight);
-            mSharedPreferencesEditor.commit();
         }
 
         if (!mSharedPreferences.contains(x)) {
@@ -91,62 +77,6 @@ public class MyApp extends Application {
         }
     }
 
-    public void setWidth(int width) {
-        if (mSharedPreferences == null || mSharedPreferencesEditor == null) {
-            return;
-        }
-
-        Log.d(TAG, "MyApp.setWidth()  width(" + width + ")");
-
-        if (mSharedPreferences.contains(this.width)) {
-            mSharedPreferencesEditor.putInt(this.width, width);
-            mSharedPreferencesEditor.commit();
-        } else {
-            Log.d(TAG, "MyApp.setWidth() no width");
-        }
-    }
-
-    public int getWidth() {
-        int w;
-        if (mSharedPreferences == null) {
-            w = defaultWidth;
-            Log.d(TAG, "MyApp.getWidth() mSharedPreferences is null, Width = " + w);
-        } else {
-            w = mSharedPreferences.getInt(width, defaultWidth);
-            Log.d(TAG, "MyApp.getWidth() Width = " + w);
-        }
-
-        return w;
-    }
-
-    public void setHeight(int height) {
-        if (mSharedPreferences == null || mSharedPreferencesEditor == null) {
-            return;
-        }
-
-        Log.d(TAG, "MyApp.setHeight()  height(" + height + ")");
-
-        if (mSharedPreferences.contains(this.height)) {
-            mSharedPreferencesEditor.putInt(this.height, height);
-            mSharedPreferencesEditor.commit();
-        } else {
-            Log.d(TAG, "MyApp.setHeight() no height");
-        }
-    }
-
-    public int getHeight() {
-        int h;
-        if (mSharedPreferences == null) {
-            h = defaultHeight;
-            Log.d(TAG, "MyApp.getHeight() mSharedPreferences is null, Height = " + h);
-        } else {
-            h = mSharedPreferences.getInt(height, defaultHeight);
-            Log.d(TAG, "MyApp.getHeight()  Height = " + h);
-        }
-
-        return h;
-    }
-
     public int getX() {
         int x;
         if (mSharedPreferences == null) {
@@ -184,9 +114,6 @@ public class MyApp extends Application {
         if (mSharedPreferences.contains(this.textSize)) {
             mSharedPreferencesEditor.putInt(this.textSize, size);
             mSharedPreferencesEditor.commit();
-
-            setWidth(size * defaultWidth / defaultTextSize);
-            setHeight(size * defaultHeight / defaultTextSize);
         } else {
             Log.d(TAG, "MyApp.setTextSize() no textSize");
         }
