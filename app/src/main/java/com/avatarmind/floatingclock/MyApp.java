@@ -6,7 +6,7 @@ import android.content.SharedPreferences;
 import android.util.Log;
 
 public class MyApp extends Application {
-    private static final String TAG = "FloatingClock";
+    private static final String TAG = "FloatingClock.MyApp";
     private static final String x = "x";
     private static final String y = "y";
     private static final String textSize = "textSize";
@@ -33,10 +33,8 @@ public class MyApp extends Application {
 
     public void initSharedPreferences() {
         if (mSharedPreferences == null || mSharedPreferencesEditor == null) {
-            Log.d(TAG, "MyApp.initSharedPreferences() mSharedPreferences is null");
+            Log.d(TAG, "initSharedPreferences() failed");
             return;
-        } else {
-            Log.d(TAG, "MyApp.initSharedPreferences() start");
         }
 
         if (!mSharedPreferences.contains(x)) {
@@ -57,23 +55,22 @@ public class MyApp extends Application {
 
     public void updatePosition(int x, int y) {
         if (mSharedPreferences == null || mSharedPreferencesEditor == null) {
+            Log.d(TAG, "updatePosition() failed!");
             return;
         }
-
-        Log.d(TAG, "MyApp.updatePosition() " + x + " " + y);
 
         if (mSharedPreferences.contains(this.x)) {
             mSharedPreferencesEditor.putInt(this.x, x);
             mSharedPreferencesEditor.commit();
         } else {
-            Log.d(TAG, "MyApp.updatePosition() no x");
+            Log.d(TAG, "updatePosition() failed, no x");
         }
 
         if (mSharedPreferences.contains(this.y)) {
             mSharedPreferencesEditor.putInt(this.y, y);
             mSharedPreferencesEditor.commit();
         } else {
-            Log.d(TAG, "MyApp.updatePosition() no y");
+            Log.d(TAG, "updatePosition() failed, no y");
         }
     }
 
@@ -81,10 +78,9 @@ public class MyApp extends Application {
         int x;
         if (mSharedPreferences == null) {
             x = defaultX;
-            Log.d(TAG, "MyApp.getX() mSharedPreferences is null, X = " + x);
+            Log.d(TAG, "getX() failed, use default value(" + x + ")");
         } else {
             x = mSharedPreferences.getInt(this.x, defaultX);
-            Log.d(TAG, "MyApp.getX() X = " + x);
         }
 
         return x;
@@ -94,38 +90,30 @@ public class MyApp extends Application {
         int y;
         if (mSharedPreferences == null) {
             y = defaultY;
-            Log.d(TAG, "MyApp.getY() mSharedPreferences is null, Y = " + y);
+            Log.d(TAG, "getY() failed, use default value(" + y + ")");
         } else {
             y = mSharedPreferences.getInt(this.y, defaultY);
-
-            Log.d(TAG, "MyApp.getY() Y = " + y);
         }
 
         return y;
     }
 
     public void setTextSize(int size) {
-        if (mSharedPreferences == null || mSharedPreferencesEditor == null) {
-            return;
-        }
-
-        Log.d(TAG, "MyApp.setTextSize()  size(" + size + ")");
-
-        if (mSharedPreferences.contains(this.textSize)) {
+        if (mSharedPreferences != null && mSharedPreferencesEditor != null && mSharedPreferences.contains(this.textSize)) {
             mSharedPreferencesEditor.putInt(this.textSize, size);
             mSharedPreferencesEditor.commit();
         } else {
-            Log.d(TAG, "MyApp.setTextSize() no textSize");
+            Log.d(TAG, "setTextSize() failed!");
+            return;
         }
     }
 
     public int getTextSize() {
         if (mSharedPreferences == null || mSharedPreferencesEditor == null) {
-            Log.d(TAG, "MyApp.getTextSize() use default size (" + defaultTextSize + ")");
+            Log.d(TAG, "getTextSize() failed, use default value(" + defaultTextSize + ")");
             return defaultTextSize;
         } else {
             int size = mSharedPreferences.getInt(this.textSize, defaultTextSize);
-            Log.d(TAG, "MyApp.getTextSize() size (" + size + ")");
             return size;
         }
     }

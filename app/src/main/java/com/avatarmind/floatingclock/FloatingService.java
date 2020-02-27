@@ -12,7 +12,6 @@ import android.os.IBinder;
 import android.provider.Settings;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -20,12 +19,9 @@ import android.view.WindowManager;
 import android.widget.TextClock;
 
 public class FloatingService extends Service {
-    private static final String TAG = "FloatingClock";
-
     private WindowManager windowManager;
     private WindowManager.LayoutParams layoutParams;
     private TextClock mTextClock;
-    private LocalBroadcastManager localBroadcastManager;
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -101,11 +97,6 @@ public class FloatingService extends Service {
         windowManager.updateViewLayout(mTextClock.getRootView(), layoutParams);
     }
 
-    private void updateTextClock() {
-        removeFloatingWindow();
-        showFloatingWindow();
-    }
-
     private class FloatingOnTouchListener implements View.OnTouchListener {
         private int x;
         private int y;
@@ -139,26 +130,21 @@ public class FloatingService extends Service {
     private void registerBroadcast() {
         IntentFilter intentFilter = new IntentFilter(Utile.ACTION_UPDATECLOCK);
         LocalBroadcastManager.getInstance(this).registerReceiver(clockReceiver, intentFilter);
-        Log.d(TAG, "FloatingService.registerBroadcast()");
     }
 
     private void unRegisterBroadcast() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(clockReceiver);
     }
 
-    private final ClockReceiver clockReceiver = new ClockReceiver();
-
-    public class ClockReceiver extends BroadcastReceiver {
+    private final BroadcastReceiver clockReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            Log.d(TAG, "FloatingService.ClockReceiver.onReceive() action = " + action);
 
             if (TextUtils.equals(action, Utile.ACTION_UPDATECLOCK)) {
-                Log.d(TAG, "FloatingService.ClockReceiver.onReceive() update clock");
-                updateTextClock();
+                mTextClock.setTextSize(MyApp.getApplication().getTextSize());
             } else {
             }
         }
-    }
+    };
 }

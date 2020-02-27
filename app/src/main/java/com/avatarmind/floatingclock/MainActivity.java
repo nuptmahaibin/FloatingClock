@@ -1,8 +1,10 @@
 package com.avatarmind.floatingclock;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -10,13 +12,16 @@ import android.provider.Settings;
 import android.support.v4.content.LocalBroadcastManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends Activity {
-    private static final String TAG = "FloatingClock";
+    private static final String TAG = "FloatingClock.MainActivity";
 
     private Button setTextSize;
     private EditText textsizeView;
@@ -33,6 +38,7 @@ public class MainActivity extends Activity {
         setTextSize.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+//                ShowToast(MainActivity.this, "瓜主席威武！\r\n瓜主席666！");
                 String text = textsizeView.getText().toString();
                 if (TextUtils.isEmpty(text)) {
                     return;
@@ -119,5 +125,17 @@ public class MainActivity extends Activity {
                 startService();
             }
         }
+    }
+
+    private void ShowToast(Context context, String msg) {
+        Toast toast = Toast.makeText(context, msg, Toast.LENGTH_LONG);
+        toast.setText(msg);
+        toast.setGravity(Gravity.CENTER, 0, 0);
+        LinearLayout linearLayout = (LinearLayout) toast.getView();
+        TextView textView = (TextView) linearLayout.getChildAt(0);
+        textView.setTextSize(25);
+        textView.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
+        textView.setTextColor(getColor(R.color.gold));
+        toast.show();
     }
 }
