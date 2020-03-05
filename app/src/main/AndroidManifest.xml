@@ -8,7 +8,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-        android:name="com.avatarmind.floatingclock.MyApp"
+        android:name="com.avatarmind.floatingclock.app.MyApp"
         android:allowBackup="true"
         android:configChanges="keyboardHidden|orientation|locale"
         android:icon="@mipmap/ic_launcher"
@@ -27,7 +27,7 @@
         </activity>
 
         <service
-            android:name=".FloatingService"
+            android:name=".service.FloatingService"
             android:enabled="true"
             android:exported="true">
             <intent-filter>

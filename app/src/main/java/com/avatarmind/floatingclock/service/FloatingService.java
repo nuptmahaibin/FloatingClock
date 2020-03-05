@@ -1,4 +1,4 @@
-package com.avatarmind.floatingclock;
+package com.avatarmind.floatingclock.service;
 
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -17,6 +17,9 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextClock;
+
+import com.avatarmind.floatingclock.app.MyApp;
+import com.avatarmind.floatingclock.utile.Constants;
 
 public class FloatingService extends Service {
     private WindowManager windowManager;
@@ -128,7 +131,7 @@ public class FloatingService extends Service {
     }
 
     private void registerBroadcast() {
-        IntentFilter intentFilter = new IntentFilter(Utile.ACTION_UPDATECLOCK);
+        IntentFilter intentFilter = new IntentFilter(Constants.ACTION_UPDATECLOCK);
         LocalBroadcastManager.getInstance(this).registerReceiver(clockReceiver, intentFilter);
     }
 
@@ -141,7 +144,7 @@ public class FloatingService extends Service {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
 
-            if (TextUtils.equals(action, Utile.ACTION_UPDATECLOCK)) {
+            if (TextUtils.equals(action, Constants.ACTION_UPDATECLOCK)) {
                 mTextClock.setTextSize(MyApp.getApplication().getTextSize());
             } else {
             }

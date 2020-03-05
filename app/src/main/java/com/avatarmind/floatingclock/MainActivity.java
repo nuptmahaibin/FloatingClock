@@ -20,6 +20,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.avatarmind.floatingclock.app.MyApp;
+import com.avatarmind.floatingclock.service.FloatingService;
+import com.avatarmind.floatingclock.utile.Constants;
+
 public class MainActivity extends Activity {
     private static final String TAG = "FloatingClock.MainActivity";
 
@@ -67,9 +71,9 @@ public class MainActivity extends Activity {
     }
 
     private void sendLocalBroadcast() {
-        final Intent intent = new Intent(Utile.ACTION_UPDATECLOCK);
+        final Intent intent = new Intent(Constants.ACTION_UPDATECLOCK);
         LocalBroadcastManager.getInstance(MainActivity.this).sendBroadcast(intent);
-        Log.d(TAG, "sendLocalBroadcast() action = " + Utile.ACTION_UPDATECLOCK);
+        Log.d(TAG, "sendLocalBroadcast() action = " + Constants.ACTION_UPDATECLOCK);
     }
 
     private void update_textsizeView() {

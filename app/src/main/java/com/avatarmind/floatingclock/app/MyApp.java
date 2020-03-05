@@ -1,4 +1,4 @@
-package com.avatarmind.floatingclock;
+package com.avatarmind.floatingclock.app;
 
 import android.app.Application;
 import android.content.Context;

@@ -1,5 +1,3 @@
 <resources>
     <string name="app_name">悬浮时钟</string>
-    <string name="open">打开悬浮时钟</string>
-    <string name="close">关闭悬浮时钟</string>
 </resources>
