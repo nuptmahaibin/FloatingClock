@@ -135,7 +135,7 @@ public class FloatingService extends Service {
         LocalBroadcastManager.getInstance(this).registerReceiver(clockReceiver, intentFilter);
     }
 
-    private void unRegisterBroadcast() {
+    private void unregisterReceiver() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(clockReceiver);
     }
 

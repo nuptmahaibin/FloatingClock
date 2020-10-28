@@ -70,18 +70,6 @@ public class MainActivity extends Activity {
         checkOverlayPermission();
     }
 
-    private void sendLocalBroadcast() {
-        final Intent intent = new Intent(Constants.ACTION_UPDATECLOCK);
-        LocalBroadcastManager.getInstance(MainActivity.this).sendBroadcast(intent);
-        Log.d(TAG, "sendLocalBroadcast() action = " + Constants.ACTION_UPDATECLOCK);
-    }
-
-    private void update_textsizeView() {
-
-        textsizeView.setText("");
-        textsizeView.setHint("请输入字体大小（当前为" + MyApp.getApplication().getTextSize() + "）");
-    }
-
     @Override
     public void onSaveInstanceState(Bundle outState) {
         if (this.getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -92,6 +80,17 @@ public class MainActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+    }
+
+    private void sendLocalBroadcast() {
+        final Intent intent = new Intent(Constants.ACTION_UPDATECLOCK);
+        LocalBroadcastManager.getInstance(MainActivity.this).sendBroadcast(intent);
+        Log.d(TAG, "sendLocalBroadcast() action = " + Constants.ACTION_UPDATECLOCK);
+    }
+
+    private void update_textsizeView() {
+        textsizeView.setText("");
+        textsizeView.setHint("请输入字体大小（当前为" + MyApp.getApplication().getTextSize() + "）");
     }
 
     private void startService() {
