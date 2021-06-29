@@ -18,8 +18,8 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextClock;
 
-import com.avatarmind.floatingclock.app.MyApp;
-import com.avatarmind.floatingclock.utile.Constants;
+import com.avatarmind.floatingclock.util.Constants;
+import com.avatarmind.floatingclock.util.SharedPreferencesUtil;
 
 public class FloatingService extends Service {
     private WindowManager windowManager;
@@ -40,7 +40,6 @@ public class FloatingService extends Service {
     public void onCreate() {
         super.onCreate();
 
-        MyApp.getApplication().initSharedPreferences();
         initView();
         showFloatingWindow();
         registerBroadcast();
@@ -54,7 +53,8 @@ public class FloatingService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        //removeFloatingWindow();
+        removeFloatingWindow();
+        unregisterReceiver();
     }
 
     private void initView() {
@@ -70,17 +70,17 @@ public class FloatingService extends Service {
         layoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         layoutParams.width = WindowManager.LayoutParams.WRAP_CONTENT;
         layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
-        layoutParams.x = MyApp.getApplication().getX();
-        layoutParams.y = MyApp.getApplication().getY();
+        layoutParams.x = SharedPreferencesUtil.getSharedPreferencesValue(FloatingService.this, SharedPreferencesUtil.x, SharedPreferencesUtil.defaultX);
+        layoutParams.y = SharedPreferencesUtil.getSharedPreferencesValue(FloatingService.this, SharedPreferencesUtil.y, SharedPreferencesUtil.defaultY);
     }
 
     public void showFloatingWindow() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {//判断系统版本
             if (Settings.canDrawOverlays(this)) {
-                setTextClock();
+                updateTextClock();
             }
         } else {
-            setTextClock();
+            updateTextClock();
         }
     }
 
@@ -88,11 +88,12 @@ public class FloatingService extends Service {
         windowManager.removeView(mTextClock);
     }
 
-    private void setTextClock() {
+    private void updateTextClock() {
         mTextClock = new TextClock(getApplicationContext());
         mTextClock.setOnTouchListener(new FloatingOnTouchListener());
         mTextClock.setFormat24Hour("HH:mm:ss");
-        mTextClock.setTextSize(MyApp.getApplication().getTextSize());
+        int clockSize = SharedPreferencesUtil.getSharedPreferencesValue(FloatingService.this, SharedPreferencesUtil.clockSize, SharedPreferencesUtil.defaultTextSize);
+        mTextClock.setTextSize(clockSize);
         mTextClock.setGravity(Gravity.CENTER);
         mTextClock.setTextColor(Color.BLACK);
         mTextClock.setBackgroundColor(Color.WHITE);
@@ -121,7 +122,8 @@ public class FloatingService extends Service {
                     layoutParams.x = layoutParams.x + movedX;
                     layoutParams.y = layoutParams.y + movedY;
                     windowManager.updateViewLayout(view, layoutParams);
-                    MyApp.getApplication().updatePosition(layoutParams.x, layoutParams.y);
+                    SharedPreferencesUtil.setSharedPreferencesValue(FloatingService.this, SharedPreferencesUtil.x, layoutParams.x);
+                    SharedPreferencesUtil.setSharedPreferencesValue(FloatingService.this, SharedPreferencesUtil.y, layoutParams.y);
                     break;
                 default:
                     break;
@@ -145,7 +147,8 @@ public class FloatingService extends Service {
             String action = intent.getAction();
 
             if (TextUtils.equals(action, Constants.ACTION_UPDATECLOCK)) {
-                mTextClock.setTextSize(MyApp.getApplication().getTextSize());
+                int clockSize = SharedPreferencesUtil.getSharedPreferencesValue(FloatingService.this, SharedPreferencesUtil.clockSize, SharedPreferencesUtil.defaultTextSize);
+                mTextClock.setTextSize(clockSize);
             } else {
             }
         }

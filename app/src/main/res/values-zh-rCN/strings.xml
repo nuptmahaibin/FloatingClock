@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">悬浮时钟</string>
+    <string name="clocksize">设置时钟大小：</string>
+    <string name="clocksizeremind">请输入一个小于100的正整数</string>
+    <string name="currentclocksize">当前时钟大小：</string>
+    <string name="closeclock">退出应用时关闭时钟：</string>
+    <string name="open">开</string>
+    <string name="close">关</string>
+
 </resources>

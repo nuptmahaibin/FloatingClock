@@ -4,34 +4,73 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center"
+    android:layout_gravity="center"
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <!--TextView
-        android:layout_width="wrap_content"
+    <TextView
+        android:id="@+id/tv_clocksize"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="100dp"
-        android:text="瓜主席专用版"
-        android:textColor="@color/gold"
-        android:textSize="40dp" /-->
-
-    <EditText
-        android:id="@+id/textsize"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_gravity="center"
-
-        android:hint="请输入字体大小（当前为30）"
-        android:inputType="phone"
-        android:textSize="25dp" />
-
-    <Button
-        android:id="@+id/settextsize_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerVertical="true"
-        android:layout_gravity="center"
-        android:text="设置字体大小"
+        android:gravity="center"
+        android:text="@string/currentclocksize"
         android:textSize="30dp" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="20dp"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/et_clocksize"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toEndOf="@+id/tv_setclocksize"
+            android:inputType="number"
+            android:textAlignment="center"
+            android:textSize="20dp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tv_setclocksize"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:text="@string/clocksize"
+            android:textSize="20sp"
+            />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        android:orientation="horizontal">
+
+        <Switch
+            android:id="@+id/st_close_clock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:layout_toEndOf="@+id/tv_close_clock"
+            android:switchMinWidth="90dp"
+            android:switchTextAppearance="@style/MyTextAppearance"
+            android:textOff="@string/close"
+            android:textOn="@string/open"
+            android:thumb="@drawable/bg_switch_thumb"
+            android:track="@drawable/bg_switch_track" />
+
+        <TextView
+            android:id="@+id/tv_close_clock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:text="@string/closeclock"
+            android:textSize="20sp" />
+    </RelativeLayout>
 </LinearLayout>

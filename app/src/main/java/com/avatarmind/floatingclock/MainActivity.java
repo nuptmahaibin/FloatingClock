@@ -1,69 +1,83 @@
 package com.avatarmind.floatingclock;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
-import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.support.v4.content.LocalBroadcastManager;
+import android.text.Editable;
 import android.text.TextUtils;
-import android.util.Log;
-import android.view.Gravity;
-import android.view.View;
-import android.widget.Button;
+import android.text.TextWatcher;
+import android.widget.CompoundButton;
 import android.widget.EditText;
-import android.widget.LinearLayout;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.avatarmind.floatingclock.app.MyApp;
 import com.avatarmind.floatingclock.service.FloatingService;
-import com.avatarmind.floatingclock.utile.Constants;
+import com.avatarmind.floatingclock.util.Constants;
+import com.avatarmind.floatingclock.util.SharedPreferencesUtil;
+import com.avatarmind.floatingclock.util.ToastUtil;
+import com.avatarmind.floatingclock.util.Util;
 
 public class MainActivity extends Activity {
-    private static final String TAG = "FloatingClock.MainActivity";
-
-    private Button setTextSize;
-    private EditText textsizeView;
+    private TextView mTVClockSize;
+    private EditText mEtClockSize;
+    private Switch mSwitchCloseClock;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        textsizeView = (EditText) findViewById(R.id.textsize);
-        update_textsizeView();
+        SharedPreferencesUtil.initSharedPreferences(MainActivity.this);
 
-        setTextSize = (Button) findViewById(R.id.settextsize_button);
-        setTextSize.setOnClickListener(new View.OnClickListener() {
+        mTVClockSize = (TextView) findViewById(R.id.tv_clocksize);
+        int clockSize = SharedPreferencesUtil.getSharedPreferencesValue(MainActivity.this, SharedPreferencesUtil.clockSize, SharedPreferencesUtil.defaultTextSize);
+        mTVClockSize.setText(getString(R.string.currentclocksize) + clockSize);
+
+        mEtClockSize = (EditText) findViewById(R.id.et_clocksize);
+        mEtClockSize.addTextChangedListener(new TextWatcher() {
             @Override
-            public void onClick(View view) {
-//                ShowToast(MainActivity.this, "瓜主席威武！\r\n瓜主席666！");
-                String text = textsizeView.getText().toString();
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                String text = mEtClockSize.getText().toString();
                 if (TextUtils.isEmpty(text)) {
                     return;
-                } else {
-                    int size;
-                    try {
-                        size = Integer.parseInt(text);
-                    } catch (Exception e) {
-                        update_textsizeView();
-                        return;
-                    }
-
-                    if (size <= 0) {
-                        update_textsizeView();
-                        return;
-                    }
-
-                    MyApp.getApplication().setTextSize(size);
-                    update_textsizeView();
-                    sendLocalBroadcast();
                 }
+
+                try {
+                    int size = Integer.parseInt(text);
+                    if (size <= 0 || size > 100) {
+                        ToastUtil.remind(MainActivity.this, getString(R.string.clocksizeremind), Toast.LENGTH_SHORT);
+                        mEtClockSize.setText("");
+                        return;
+                    }
+
+                    SharedPreferencesUtil.setSharedPreferencesValue(MainActivity.this, SharedPreferencesUtil.clockSize, size);
+                    Util.sendLocalBroadcast(MainActivity.this, Constants.ACTION_UPDATECLOCK);
+                    mTVClockSize.setText(getString(R.string.currentclocksize) + size);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        mSwitchCloseClock = (Switch) findViewById(R.id.st_close_clock);
+        mSwitchCloseClock.setChecked(SharedPreferencesUtil.getSharedPreferencesValue(MainActivity.this, SharedPreferencesUtil.isCloseClock, false));
+        mSwitchCloseClock.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                SharedPreferencesUtil.setSharedPreferencesValue(MainActivity.this, SharedPreferencesUtil.isCloseClock, isChecked);
             }
         });
 
@@ -80,65 +94,34 @@ public class MainActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-    }
-
-    private void sendLocalBroadcast() {
-        final Intent intent = new Intent(Constants.ACTION_UPDATECLOCK);
-        LocalBroadcastManager.getInstance(MainActivity.this).sendBroadcast(intent);
-        Log.d(TAG, "sendLocalBroadcast() action = " + Constants.ACTION_UPDATECLOCK);
-    }
-
-    private void update_textsizeView() {
-        textsizeView.setText("");
-        textsizeView.setHint("请输入字体大小（当前为" + MyApp.getApplication().getTextSize() + "）");
-    }
-
-    private void startService() {
-        Intent service = new Intent(this, FloatingService.class);
-        service.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startService(service);
-    }
-
-    private void stopService() {
-        Intent service = new Intent(this, FloatingService.class);
-        stopService(service);
-    }
-
-    private void checkOverlayPermission() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {//判断系统版本
-            if (!Settings.canDrawOverlays(this)) {
-                Toast.makeText(this, "当前无显示悬浮窗权限，请授权", Toast.LENGTH_SHORT);
-                startActivityForResult(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName())), 0);
-            } else {
-                Toast.makeText(this, "当前有权限，启动服务", Toast.LENGTH_SHORT);
-                startService();
-            }
-        } else {
-            startService();
-        }
+        if (SharedPreferencesUtil.getSharedPreferencesValue(MainActivity.this, SharedPreferencesUtil.isCloseClock, false))
+            Util.stopService(MainActivity.this, FloatingService.class);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == 0) {
             if (!Settings.canDrawOverlays(this)) {
-                Toast.makeText(this, "授权失败", Toast.LENGTH_SHORT).show();
+                ToastUtil.remind(MainActivity.this, "授权失败", Toast.LENGTH_SHORT);
             } else {
-                Toast.makeText(this, "授权成功", Toast.LENGTH_SHORT).show();
-                startService();
+                ToastUtil.error(MainActivity.this, "授权成功", Toast.LENGTH_SHORT);
+                Util.startService(MainActivity.this, FloatingService.class);
             }
         }
     }
 
-    private void ShowToast(Context context, String msg) {
-        Toast toast = Toast.makeText(context, msg, Toast.LENGTH_LONG);
-        toast.setText(msg);
-        toast.setGravity(Gravity.CENTER, 0, 0);
-        LinearLayout linearLayout = (LinearLayout) toast.getView();
-        TextView textView = (TextView) linearLayout.getChildAt(0);
-        textView.setTextSize(25);
-        textView.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
-        textView.setTextColor(getColor(R.color.gold));
-        toast.show();
+    private void checkOverlayPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {//判断系统版本
+            if (!Settings.canDrawOverlays(this)) {
+                ToastUtil.remind(MainActivity.this, "应用没有显示悬浮窗权限，请授权", Toast.LENGTH_SHORT);
+                startActivityForResult(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName())), 0);
+            } else {
+                Util.startService(MainActivity.this, FloatingService.class);
+            }
+        } else {
+            Util.startService(MainActivity.this, FloatingService.class);
+        }
     }
+
+
 }
