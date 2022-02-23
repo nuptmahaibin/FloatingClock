@@ -1,25 +1,25 @@
 package com.avatarmind.floatingclock.service;
 
 import android.app.Service;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.os.Build;
 import android.os.IBinder;
 import android.provider.Settings;
-import android.support.v4.content.LocalBroadcastManager;
-import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextClock;
 
-import com.avatarmind.floatingclock.util.Constants;
+import com.avatarmind.floatingclock.util.ClockInfo;
 import com.avatarmind.floatingclock.util.SharedPreferencesUtil;
+import com.avatarmind.floatingclock.util.event.UpdateClockViewEvent;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 public class FloatingService extends Service {
     private WindowManager windowManager;
@@ -39,10 +39,7 @@ public class FloatingService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-
-        initView();
-        showFloatingWindow();
-        registerBroadcast();
+        init();
     }
 
     @Override
@@ -53,11 +50,13 @@ public class FloatingService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        removeFloatingWindow();
-        unregisterReceiver();
+        uninit();
     }
 
-    private void initView() {
+    private void init() {
+        EventBus.getDefault().register(this);
+        ClockInfo clockInfo = SharedPreferencesUtil.getClockInfo(FloatingService.this);
+
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
         layoutParams = new WindowManager.LayoutParams();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -70,35 +69,26 @@ public class FloatingService extends Service {
         layoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         layoutParams.width = WindowManager.LayoutParams.WRAP_CONTENT;
         layoutParams.height = WindowManager.LayoutParams.WRAP_CONTENT;
-        layoutParams.x = SharedPreferencesUtil.getSharedPreferencesValue(FloatingService.this, SharedPreferencesUtil.x, SharedPreferencesUtil.defaultX);
-        layoutParams.y = SharedPreferencesUtil.getSharedPreferencesValue(FloatingService.this, SharedPreferencesUtil.y, SharedPreferencesUtil.defaultY);
-    }
+        layoutParams.x = clockInfo.getX();
+        layoutParams.y = clockInfo.getY();
 
-    public void showFloatingWindow() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {//判断系统版本
-            if (Settings.canDrawOverlays(this)) {
-                updateTextClock();
-            }
-        } else {
-            updateTextClock();
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M || Settings.canDrawOverlays(this)) {
+            mTextClock = new TextClock(getApplicationContext());
+            mTextClock.setFormat24Hour("HH:mm:ss");
+            mTextClock.setTextSize(clockInfo.getTextSize());
+            mTextClock.setGravity(Gravity.CENTER);
+            mTextClock.setTextColor(Color.BLACK);
+            mTextClock.setBackgroundColor(Color.WHITE);
+            mTextClock.setOnTouchListener(new FloatingOnTouchListener());
+
+            windowManager.addView(mTextClock, layoutParams);
+            windowManager.updateViewLayout(mTextClock.getRootView(), layoutParams);
         }
     }
 
-    public void removeFloatingWindow() {
+    private void uninit() {
+        EventBus.getDefault().unregister(this);
         windowManager.removeView(mTextClock);
-    }
-
-    private void updateTextClock() {
-        mTextClock = new TextClock(getApplicationContext());
-        mTextClock.setOnTouchListener(new FloatingOnTouchListener());
-        mTextClock.setFormat24Hour("HH:mm:ss");
-        int clockSize = SharedPreferencesUtil.getSharedPreferencesValue(FloatingService.this, SharedPreferencesUtil.clockSize, SharedPreferencesUtil.defaultTextSize);
-        mTextClock.setTextSize(clockSize);
-        mTextClock.setGravity(Gravity.CENTER);
-        mTextClock.setTextColor(Color.BLACK);
-        mTextClock.setBackgroundColor(Color.WHITE);
-        windowManager.addView(mTextClock, layoutParams);
-        windowManager.updateViewLayout(mTextClock.getRootView(), layoutParams);
     }
 
     private class FloatingOnTouchListener implements View.OnTouchListener {
@@ -122,8 +112,11 @@ public class FloatingService extends Service {
                     layoutParams.x = layoutParams.x + movedX;
                     layoutParams.y = layoutParams.y + movedY;
                     windowManager.updateViewLayout(view, layoutParams);
-                    SharedPreferencesUtil.setSharedPreferencesValue(FloatingService.this, SharedPreferencesUtil.x, layoutParams.x);
-                    SharedPreferencesUtil.setSharedPreferencesValue(FloatingService.this, SharedPreferencesUtil.y, layoutParams.y);
+
+                    ClockInfo clockInfo = SharedPreferencesUtil.getClockInfo(FloatingService.this);
+                    clockInfo.setX(layoutParams.x);
+                    clockInfo.setY(layoutParams.y);
+                    SharedPreferencesUtil.setClockInfo(FloatingService.this, clockInfo);
                     break;
                 default:
                     break;
@@ -132,25 +125,12 @@ public class FloatingService extends Service {
         }
     }
 
-    private void registerBroadcast() {
-        IntentFilter intentFilter = new IntentFilter(Constants.ACTION_UPDATECLOCK);
-        LocalBroadcastManager.getInstance(this).registerReceiver(clockReceiver, intentFilter);
-    }
-
-    private void unregisterReceiver() {
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(clockReceiver);
-    }
-
-    private final BroadcastReceiver clockReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();
-
-            if (TextUtils.equals(action, Constants.ACTION_UPDATECLOCK)) {
-                int clockSize = SharedPreferencesUtil.getSharedPreferencesValue(FloatingService.this, SharedPreferencesUtil.clockSize, SharedPreferencesUtil.defaultTextSize);
-                mTextClock.setTextSize(clockSize);
-            } else {
-            }
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEventMainThread(UpdateClockViewEvent event) {
+        if (event != null && mTextClock != null) {
+            ClockInfo clockInfo = event.getClockInfo();
+            mTextClock.setTextSize(clockInfo.getTextSize());
+            SharedPreferencesUtil.setClockInfo(FloatingService.this, clockInfo);
         }
-    };
+    }
 }

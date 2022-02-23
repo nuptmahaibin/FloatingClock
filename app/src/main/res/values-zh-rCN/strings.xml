@@ -3,7 +3,7 @@
     <string name="clocksize">设置时钟大小：</string>
     <string name="clocksizeremind">请输入一个小于100的正整数</string>
     <string name="currentclocksize">当前时钟大小：</string>
-    <string name="closeclock">退出应用时关闭时钟：</string>
+    <string name="run_in_background">后台运行：</string>
     <string name="open">开</string>
     <string name="close">关</string>
 

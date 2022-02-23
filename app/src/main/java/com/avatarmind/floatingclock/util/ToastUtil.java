@@ -11,28 +11,11 @@ import android.widget.Toast;
 public class ToastUtil {
     private static Toast mToast = null;
 
-    public static void error(final Context context, final String text) {
-        showToast(context, text, 0, Toast.LENGTH_LONG, Gravity.CENTER);
+    private ToastUtil() {
     }
 
-    public static void remind(final Context context, final String text) {
-        showToast(context, text, 0, Toast.LENGTH_LONG, Gravity.CENTER);
-    }
-
-    public static void debug(final Context context, final String text) {
-        if (Constants.DEBUG) showToast(context, text, 0, Toast.LENGTH_LONG, Gravity.CENTER);
-    }
-
-    public static void error(final Context context, final String text, int duration) {
-        showToast(context, text, 0, duration, Gravity.CENTER);
-    }
-
-    public static void remind(final Context context, final String text, int duration) {
-        showToast(context, text, 0, duration, Gravity.CENTER);
-    }
-
-    public static void debug(final Context context, final String text, int duration) {
-        if (Constants.DEBUG) showToast(context, text, 0, duration, Gravity.CENTER);
+    public static void showToast(Context context, String text) {
+        showToast(context, text, 25, Toast.LENGTH_LONG, Gravity.CENTER);
     }
 
     /**
@@ -44,28 +27,30 @@ public class ToastUtil {
      * @param gravity  位置（Gravity.CENTER;Gravity.TOP;...）
      */
     public static void showToast(final Context context, final String text, final int textSize, final int duration, final int gravity) {
-        Handler handlerThree = new Handler(Looper.getMainLooper());
-        handlerThree.post(new Runnable() {
+        Runnable toastRunnable = new Runnable() {
+            @Override
             public void run() {
                 if (mToast == null) {
-                    mToast = Toast.makeText(context.getApplicationContext(), null, Toast.LENGTH_SHORT);
+                    mToast = Toast.makeText(context, "", duration);
                 }
 
-                int size = textSize;
-                if (size <= 0) {
-                    size = 20;
+                try {
+                    LinearLayout linearLayout = (LinearLayout) mToast.getView();
+                    TextView textView = (TextView) linearLayout.getChildAt(0);
+                    textView.setTextSize(textSize);
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-
-                mToast.setText(text);
-                LinearLayout linearLayout = (LinearLayout) mToast.getView();
-                TextView textView = (TextView) linearLayout.getChildAt(0);
-                textView.setTextSize(size);
 
                 mToast.setDuration(duration);
                 mToast.setGravity(gravity, 0, 0);
+                mToast.setText(text);
                 mToast.show();
             }
-        });
+        };
+
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.post(toastRunnable);
     }
 
     /**

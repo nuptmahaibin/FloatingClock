@@ -3,7 +3,7 @@
     <string name="clocksize">Set Clock Size: </string>
     <string name="clocksizeremind">Please enter a positive integer less than 100</string>
     <string name="currentclocksize">Current Clock Size: </string>
-    <string name="closeclock">Close clock after exiting app: </string>
+    <string name="run_in_background">Run In Background: </string>
     <string name="open">Open</string>
     <string name="close">Close</string>
 

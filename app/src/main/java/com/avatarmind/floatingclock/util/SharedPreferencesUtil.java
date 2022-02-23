@@ -2,126 +2,71 @@ package com.avatarmind.floatingclock.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.text.TextUtils;
 
 public class SharedPreferencesUtil {
-    private static SharedPreferences mSharedPreferences;
-    private static SharedPreferences.Editor mSharedPreferencesEditor;
-    public static final int defaultX = 1;
-    public static final int defaultY = 1;
-    public static final int defaultTextSize = 30;
-
-    public static final String isCloseClock = "isCloseClock";
-    public static final String x = "x";
-    public static final String y = "y";
-    public static final String clockSize = "clockSize";
+    public static final String CLOCKINFO = "clockinfo";
+    public static final String isRunInBackground = "isRunInBackground";
 
     public static void initSharedPreferences(Context context) {
-        if (context instanceof Context) {
-            // do nothing
-        } else {
-            return;
-        }
+        if (context != null) {
+            SharedPreferences sharedPreferences = context.getSharedPreferences("com.avatarmind.floatclock_preferences", Context.MODE_PRIVATE);
+            SharedPreferences.Editor sharedPreferencesEditor = sharedPreferences.edit();
 
-        mSharedPreferences = context.getSharedPreferences("com.avatarmind.floatclock_preferences", Context.MODE_PRIVATE);
-        mSharedPreferencesEditor = mSharedPreferences.edit();
+            if (sharedPreferencesEditor == null) {
+                return;
+            }
 
-        if (mSharedPreferences == null || mSharedPreferencesEditor == null) {
-            return;
-        }
+            if (!sharedPreferences.contains(CLOCKINFO)) {
+                sharedPreferencesEditor.putString(CLOCKINFO, ClockInfo.getDefault());
+                sharedPreferencesEditor.apply();
+            }
 
-        if (!mSharedPreferences.contains(clockSize)) {
-            mSharedPreferencesEditor.putBoolean(clockSize, false);
-            mSharedPreferencesEditor.commit();
-        }
-
-        if (!mSharedPreferences.contains(x)) {
-            mSharedPreferencesEditor.putInt(x, defaultX);
-            mSharedPreferencesEditor.commit();
-        }
-
-        if (!mSharedPreferences.contains(y)) {
-            mSharedPreferencesEditor.putInt(y, defaultY);
-            mSharedPreferencesEditor.commit();
-        }
-
-        if (!mSharedPreferences.contains(clockSize)) {
-            mSharedPreferencesEditor.putInt(clockSize, defaultTextSize);
-            mSharedPreferencesEditor.commit();
+            if (!sharedPreferences.contains(isRunInBackground)) {
+                sharedPreferencesEditor.putBoolean(isRunInBackground, false);
+                sharedPreferencesEditor.apply();
+            }
         }
     }
 
-    public static boolean getSharedPreferencesValue(Context context, String name, boolean defaultValue) {
-        if (context instanceof Context) {
-            // do nothing
-        } else {
-            return defaultValue;
+    public static ClockInfo getClockInfo(Context context) {
+        if (context != null) {
+            SharedPreferences sharedPreferences = context.getSharedPreferences("com.avatarmind.nav_preferences", Context.MODE_PRIVATE);
+            String clockInfo = sharedPreferences.getString(CLOCKINFO, ClockInfo.getDefault());
+            if (!TextUtils.isEmpty(clockInfo)) {
+                return ClockInfo.getClockInfo(clockInfo);
+            }
         }
 
-        SharedPreferences sharedPreferences = context.getSharedPreferences("com.avatarmind.nav_preferences", Context.MODE_PRIVATE);
-        return sharedPreferences.getBoolean(name, defaultValue);
+        return null;
     }
 
-    public static void setSharedPreferencesValue(Context context, String name, boolean value) {
-        if (context instanceof Context) {
-            // do nothing
-        } else {
-            return;
+    public static void setClockInfo(Context context, ClockInfo clockInfo) {
+        if (context != null && clockInfo != null) {
+            SharedPreferences sharedPreferences = context.getSharedPreferences("com.avatarmind.nav_preferences", Context.MODE_PRIVATE);
+            SharedPreferences.Editor sharedPreferencesEditor = sharedPreferences.edit();
+
+            sharedPreferencesEditor.putString(CLOCKINFO, clockInfo.getString());
+            sharedPreferencesEditor.apply();
         }
-
-        SharedPreferences sharedPreferences = context.getSharedPreferences("com.avatarmind.nav_preferences", Context.MODE_PRIVATE);
-        SharedPreferences.Editor sharedPreferencesEditor = sharedPreferences.edit();
-
-        sharedPreferencesEditor.putBoolean(name, value);
-        sharedPreferencesEditor.commit();
     }
 
-    public static int getSharedPreferencesValue(Context context, String name, int defaultValue) {
-        if (context instanceof Context) {
-            // do nothing
-        } else {
-            return defaultValue;
+    public static boolean isExit(Context context) {
+        if (context != null) {
+            SharedPreferences sharedPreferences = context.getSharedPreferences("com.avatarmind.nav_preferences", Context.MODE_PRIVATE);
+            return sharedPreferences.getBoolean(isRunInBackground, false);
         }
 
-        SharedPreferences sharedPreferences = context.getSharedPreferences("com.avatarmind.nav_preferences", Context.MODE_PRIVATE);
-        return sharedPreferences.getInt(name, defaultValue);
+        return false;
     }
 
-    public static void setSharedPreferencesValue(Context context, String name, int value) {
-        if (context instanceof Context) {
-            // do nothing
-        } else {
-            return;
+    public static void setIsExit(Context context, boolean ret) {
+        if (context != null) {
+            SharedPreferences sharedPreferences = context.getSharedPreferences("com.avatarmind.nav_preferences", Context.MODE_PRIVATE);
+            SharedPreferences.Editor sharedPreferencesEditor = sharedPreferences.edit();
+
+            sharedPreferencesEditor.putBoolean(isRunInBackground, ret);
+            sharedPreferencesEditor.apply();
         }
-
-        SharedPreferences sharedPreferences = context.getSharedPreferences("com.avatarmind.nav_preferences", Context.MODE_PRIVATE);
-        SharedPreferences.Editor sharedPreferencesEditor = sharedPreferences.edit();
-
-        sharedPreferencesEditor.putInt(name, value);
-        sharedPreferencesEditor.commit();
-    }
-
-    public static String getSharedPreferencesValue(Context context, String name, String defaultValue) {
-        if (context instanceof Context) {
-            // do nothing
-        } else {
-            return defaultValue;
-        }
-
-        SharedPreferences sharedPreferences = context.getSharedPreferences("com.avatarmind.nav_preferences", Context.MODE_PRIVATE);
-        return sharedPreferences.getString(name, defaultValue);
-    }
-
-    public static void setSharedPreferencesValue(Context context, String name, String value) {
-        if (context instanceof Context) {
-            // do nothing
-        } else {
-            return;
-        }
-
-        SharedPreferences sharedPreferences = context.getSharedPreferences("com.avatarmind.nav_preferences", Context.MODE_PRIVATE);
-        SharedPreferences.Editor sharedPreferencesEditor = sharedPreferences.edit();
-
-        sharedPreferencesEditor.putString(name, value);
-        sharedPreferencesEditor.commit();
     }
 }

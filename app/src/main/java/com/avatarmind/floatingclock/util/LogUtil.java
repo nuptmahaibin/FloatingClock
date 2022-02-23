@@ -3,6 +3,7 @@ package com.avatarmind.floatingclock.util;
 import android.util.Log;
 
 public class LogUtil {
+    private static final boolean DEBUG = false;
     private static final String TAG = LogUtil.class.getSimpleName() + " ";
     private static int LEVEL = Log.INFO;
 
@@ -15,7 +16,7 @@ public class LogUtil {
     }
 
     public static int v(String msg) {
-        if (Constants.DEBUG) {
+        if (DEBUG) {
             LEVEL = Log.VERBOSE;
         }
 
@@ -28,7 +29,7 @@ public class LogUtil {
     }
 
     public static int v(String msg, Throwable tr) {
-        if (Constants.DEBUG) {
+        if (DEBUG) {
             LEVEL = Log.VERBOSE;
         }
 
@@ -41,7 +42,7 @@ public class LogUtil {
     }
 
     public static int d(String msg) {
-        if (Constants.DEBUG) {
+        if (DEBUG) {
             LEVEL = Log.VERBOSE;
         }
 
@@ -54,7 +55,7 @@ public class LogUtil {
     }
 
     public static int d(String msg, Throwable tr) {
-        if (Constants.DEBUG) {
+        if (DEBUG) {
             LEVEL = Log.VERBOSE;
         }
 
@@ -67,7 +68,7 @@ public class LogUtil {
     }
 
     public static int i(String msg) {
-        if (Constants.DEBUG) {
+        if (DEBUG) {
             LEVEL = Log.VERBOSE;
         }
 
@@ -80,7 +81,7 @@ public class LogUtil {
     }
 
     public static int i(String msg, Throwable tr) {
-        if (Constants.DEBUG) {
+        if (DEBUG) {
             LEVEL = Log.VERBOSE;
         }
 
@@ -93,7 +94,7 @@ public class LogUtil {
     }
 
     public static int w(String msg) {
-        if (Constants.DEBUG) {
+        if (DEBUG) {
             LEVEL = Log.VERBOSE;
         }
 
@@ -106,7 +107,7 @@ public class LogUtil {
     }
 
     public static int w(String msg, Throwable tr) {
-        if (Constants.DEBUG) {
+        if (DEBUG) {
             LEVEL = Log.VERBOSE;
         }
 
@@ -119,7 +120,7 @@ public class LogUtil {
     }
 
     public static int e(String msg) {
-        if (Constants.DEBUG) {
+        if (DEBUG) {
             LEVEL = Log.VERBOSE;
         }
 
@@ -132,7 +133,7 @@ public class LogUtil {
     }
 
     public static int e(String msg, Throwable tr) {
-        if (Constants.DEBUG) {
+        if (DEBUG) {
             LEVEL = Log.VERBOSE;
         }
 

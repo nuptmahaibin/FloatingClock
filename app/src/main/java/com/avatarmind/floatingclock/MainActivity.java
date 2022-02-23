@@ -14,18 +14,20 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Switch;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.avatarmind.floatingclock.service.FloatingService;
-import com.avatarmind.floatingclock.util.Constants;
+import com.avatarmind.floatingclock.util.ClockInfo;
+import com.avatarmind.floatingclock.util.LogUtil;
 import com.avatarmind.floatingclock.util.SharedPreferencesUtil;
 import com.avatarmind.floatingclock.util.ToastUtil;
 import com.avatarmind.floatingclock.util.Util;
+import com.avatarmind.floatingclock.util.event.UpdateClockViewEvent;
+
+import org.greenrobot.eventbus.EventBus;
 
 public class MainActivity extends Activity {
     private TextView mTVClockSize;
     private EditText mEtClockSize;
-    private Switch mSwitchCloseClock;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,12 +35,13 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         SharedPreferencesUtil.initSharedPreferences(MainActivity.this);
+        ClockInfo clockInfo = SharedPreferencesUtil.getClockInfo(MainActivity.this);
 
         mTVClockSize = (TextView) findViewById(R.id.tv_clocksize);
-        int clockSize = SharedPreferencesUtil.getSharedPreferencesValue(MainActivity.this, SharedPreferencesUtil.clockSize, SharedPreferencesUtil.defaultTextSize);
-        mTVClockSize.setText(getString(R.string.currentclocksize) + clockSize);
+        mTVClockSize.setText(getString(R.string.currentclocksize) + clockInfo.getTextSize());
 
         mEtClockSize = (EditText) findViewById(R.id.et_clocksize);
+        mEtClockSize.setText(String.valueOf(clockInfo.getTextSize()));
         mEtClockSize.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -50,34 +53,38 @@ public class MainActivity extends Activity {
 
             @Override
             public void afterTextChanged(Editable s) {
+                LogUtil.i("afterTextChanged()");
+
                 String text = mEtClockSize.getText().toString();
                 if (TextUtils.isEmpty(text)) {
                     return;
                 }
 
+                ClockInfo clockInfo = SharedPreferencesUtil.getClockInfo(MainActivity.this);
+                int size = Integer.parseInt(text);
+
                 try {
-                    int size = Integer.parseInt(text);
                     if (size <= 0 || size > 100) {
-                        ToastUtil.remind(MainActivity.this, getString(R.string.clocksizeremind), Toast.LENGTH_SHORT);
+                        ToastUtil.showToast(MainActivity.this, getString(R.string.clocksizeremind));
                         mEtClockSize.setText("");
                         return;
                     }
-
-                    SharedPreferencesUtil.setSharedPreferencesValue(MainActivity.this, SharedPreferencesUtil.clockSize, size);
-                    Util.sendLocalBroadcast(MainActivity.this, Constants.ACTION_UPDATECLOCK);
-                    mTVClockSize.setText(getString(R.string.currentclocksize) + size);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+
+                clockInfo.setTextSize(size);
+                EventBus.getDefault().post(new UpdateClockViewEvent(clockInfo));
+                mTVClockSize.setText(getString(R.string.currentclocksize) + clockInfo.getTextSize());
             }
         });
 
-        mSwitchCloseClock = (Switch) findViewById(R.id.st_close_clock);
-        mSwitchCloseClock.setChecked(SharedPreferencesUtil.getSharedPreferencesValue(MainActivity.this, SharedPreferencesUtil.isCloseClock, false));
-        mSwitchCloseClock.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        Switch switchCloseClock = (Switch) findViewById(R.id.st_close_clock);
+        switchCloseClock.setChecked(SharedPreferencesUtil.isExit(MainActivity.this));
+        switchCloseClock.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                SharedPreferencesUtil.setSharedPreferencesValue(MainActivity.this, SharedPreferencesUtil.isCloseClock, isChecked);
+                SharedPreferencesUtil.setIsExit(MainActivity.this, isChecked);
             }
         });
 
@@ -94,7 +101,8 @@ public class MainActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (SharedPreferencesUtil.getSharedPreferencesValue(MainActivity.this, SharedPreferencesUtil.isCloseClock, false))
+
+        if (!SharedPreferencesUtil.isExit(MainActivity.this))
             Util.stopService(MainActivity.this, FloatingService.class);
     }
 
@@ -102,9 +110,9 @@ public class MainActivity extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == 0) {
             if (!Settings.canDrawOverlays(this)) {
-                ToastUtil.remind(MainActivity.this, "授权失败", Toast.LENGTH_SHORT);
+                ToastUtil.showToast(MainActivity.this, "授权失败");
             } else {
-                ToastUtil.error(MainActivity.this, "授权成功", Toast.LENGTH_SHORT);
+                ToastUtil.showToast(MainActivity.this, "授权成功");
                 Util.startService(MainActivity.this, FloatingService.class);
             }
         }
@@ -113,7 +121,7 @@ public class MainActivity extends Activity {
     private void checkOverlayPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {//判断系统版本
             if (!Settings.canDrawOverlays(this)) {
-                ToastUtil.remind(MainActivity.this, "应用没有显示悬浮窗权限，请授权", Toast.LENGTH_SHORT);
+                ToastUtil.showToast(MainActivity.this, "应用没有显示悬浮窗权限，请授权");
                 startActivityForResult(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:" + getPackageName())), 0);
             } else {
                 Util.startService(MainActivity.this, FloatingService.class);
@@ -122,6 +130,4 @@ public class MainActivity extends Activity {
             Util.startService(MainActivity.this, FloatingService.class);
         }
     }
-
-
 }
