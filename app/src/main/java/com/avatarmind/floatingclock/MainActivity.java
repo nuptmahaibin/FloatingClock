@@ -55,27 +55,27 @@ public class MainActivity extends Activity {
             public void afterTextChanged(Editable s) {
                 LogUtil.i("afterTextChanged()");
 
-                String text = mEtClockSize.getText().toString();
-                if (TextUtils.isEmpty(text)) {
-                    return;
-                }
-
-                ClockInfo clockInfo = SharedPreferencesUtil.getClockInfo(MainActivity.this);
-                int size = Integer.parseInt(text);
-
                 try {
+                    String text = mEtClockSize.getText().toString();
+                    if (TextUtils.isEmpty(text)) {
+                        return;
+                    }
+
+                    ClockInfo clockInfo = SharedPreferencesUtil.getClockInfo(MainActivity.this);
+
+                    int size = Integer.parseInt(text);
                     if (size <= 0 || size > 100) {
                         ToastUtil.showToast(MainActivity.this, getString(R.string.clocksizeremind));
                         mEtClockSize.setText("");
                         return;
                     }
+
+                    clockInfo.setTextSize(size);
+                    EventBus.getDefault().post(new UpdateClockViewEvent(clockInfo));
+                    mTVClockSize.setText(getString(R.string.currentclocksize) + clockInfo.getTextSize());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-
-                clockInfo.setTextSize(size);
-                EventBus.getDefault().post(new UpdateClockViewEvent(clockInfo));
-                mTVClockSize.setText(getString(R.string.currentclocksize) + clockInfo.getTextSize());
             }
         });
 
