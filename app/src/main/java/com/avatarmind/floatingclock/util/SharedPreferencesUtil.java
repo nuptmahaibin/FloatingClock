@@ -5,12 +5,13 @@ import android.content.SharedPreferences;
 import android.text.TextUtils;
 
 public class SharedPreferencesUtil {
+    public static final String PREFERENCES_NAME = "com.avatarmind.floatclock_preferences";
     public static final String CLOCKINFO = "clockinfo";
     public static final String isRunInBackground = "isRunInBackground";
 
     public static void initSharedPreferences(Context context) {
         if (context != null) {
-            SharedPreferences sharedPreferences = context.getSharedPreferences("com.avatarmind.floatclock_preferences", Context.MODE_PRIVATE);
+            SharedPreferences sharedPreferences = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
             SharedPreferences.Editor sharedPreferencesEditor = sharedPreferences.edit();
 
             if (sharedPreferencesEditor == null) {
@@ -31,7 +32,7 @@ public class SharedPreferencesUtil {
 
     public static ClockInfo getClockInfo(Context context) {
         if (context != null) {
-            SharedPreferences sharedPreferences = context.getSharedPreferences("com.avatarmind.nav_preferences", Context.MODE_PRIVATE);
+            SharedPreferences sharedPreferences = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
             String clockInfo = sharedPreferences.getString(CLOCKINFO, ClockInfo.getDefault());
             if (!TextUtils.isEmpty(clockInfo)) {
                 return ClockInfo.getClockInfo(clockInfo);
@@ -43,7 +44,7 @@ public class SharedPreferencesUtil {
 
     public static void setClockInfo(Context context, ClockInfo clockInfo) {
         if (context != null && clockInfo != null) {
-            SharedPreferences sharedPreferences = context.getSharedPreferences("com.avatarmind.nav_preferences", Context.MODE_PRIVATE);
+            SharedPreferences sharedPreferences = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
             SharedPreferences.Editor sharedPreferencesEditor = sharedPreferences.edit();
 
             sharedPreferencesEditor.putString(CLOCKINFO, clockInfo.getString());
@@ -53,7 +54,7 @@ public class SharedPreferencesUtil {
 
     public static boolean isExit(Context context) {
         if (context != null) {
-            SharedPreferences sharedPreferences = context.getSharedPreferences("com.avatarmind.nav_preferences", Context.MODE_PRIVATE);
+            SharedPreferences sharedPreferences = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
             return sharedPreferences.getBoolean(isRunInBackground, false);
         }
 
@@ -62,7 +63,7 @@ public class SharedPreferencesUtil {
 
     public static void setIsExit(Context context, boolean ret) {
         if (context != null) {
-            SharedPreferences sharedPreferences = context.getSharedPreferences("com.avatarmind.nav_preferences", Context.MODE_PRIVATE);
+            SharedPreferences sharedPreferences = context.getSharedPreferences(PREFERENCES_NAME, Context.MODE_PRIVATE);
             SharedPreferences.Editor sharedPreferencesEditor = sharedPreferences.edit();
 
             sharedPreferencesEditor.putBoolean(isRunInBackground, ret);
